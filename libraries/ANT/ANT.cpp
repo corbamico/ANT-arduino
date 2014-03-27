@@ -50,7 +50,7 @@ UCHAR CheckSum_Calc8(const volatile void *pvDataPtr_, USHORT usSize_)
 {
    const UCHAR *pucDataPtr = (UCHAR *)pvDataPtr_;
    UCHAR ucCheckSum = 0;
-   int i;
+   USHORT i;
    
    // Calculate the CheckSum value (XOR of all bytes in the buffer).
    for (i = 0; i < usSize_; i++)
@@ -77,6 +77,7 @@ public:
 	   UCHAR aucTxFifo[TX_FIFO_SIZE];
 	   UCHAR ucTotalSize;
 
+	
 	   if (usMessageSize_ > MESG_MAX_SIZE_VALUE)
 	   {
 		  return FALSE;
@@ -87,7 +88,8 @@ public:
 	   aucTxFifo[MESG_SIZE_OFFSET] = (UCHAR) usMessageSize_;
 	   aucTxFifo[MESG_ID_OFFSET] = ((ANT_MESSAGE *) pvData_)->ucMessageID;
 	   memcpy(&aucTxFifo[MESG_DATA_OFFSET], ((ANT_MESSAGE *) pvData_)->aucData, usMessageSize_);
-	   aucTxFifo[ucTotalSize++] = CheckSum_Calc8(aucTxFifo, ucTotalSize);
+	   aucTxFifo[ucTotalSize] = CheckSum_Calc8(aucTxFifo, ucTotalSize);
+	   ucTotalSize++;
 
 	   // Pad with two zeros.
 	   aucTxFifo[ucTotalSize++] = 0;
@@ -128,6 +130,50 @@ public:
 	   return WriteMessage(&stMessage, MESG_SYSTEM_RESET_SIZE);		
 	}
 	
+	///////////////////////////////////////////////////////////////////////
+	BOOL SetNetworkKey(UCHAR ucNetworkNumber_, UCHAR *pucKey_, ULONG ulResponseTime_)
+	{
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_NETWORK_KEY_ID;
+	   stMessage.aucData[0] = ucNetworkNumber_;
+	   memcpy(&stMessage.aucData[1], pucKey_, 8);
+
+	   return SendCommand(&stMessage, MESG_NETWORK_KEY_SIZE, ulResponseTime_);
+	}
+	BOOL AssignChannel(UCHAR ucANTChannel_, UCHAR ucChannelType_, UCHAR ucNetworkNumber_, ULONG ulResponseTime_)
+	{
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_ASSIGN_CHANNEL_ID;
+	   stMessage.aucData[0] = ucANTChannel_;
+	   stMessage.aucData[1] = ucChannelType_;
+	   stMessage.aucData[2] = ucNetworkNumber_;
+
+	   return SendCommand(&stMessage, MESG_ASSIGN_CHANNEL_SIZE, ulResponseTime_);
+	}
+	BOOL SetChannelPeriod(UCHAR ucANTChannel_, USHORT usMessagePeriod_, ULONG ulResponseTime_)
+	{
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_CHANNEL_MESG_PERIOD_ID;
+	   stMessage.aucData[0] = ucANTChannel_;
+	   stMessage.aucData[1] = (UCHAR)(usMessagePeriod_ & 0xFF);
+	   stMessage.aucData[2] = (UCHAR)((usMessagePeriod_ >>8) & 0xFF);
+
+	   return SendCommand(&stMessage, MESG_CHANNEL_MESG_PERIOD_SIZE, ulResponseTime_);
+	}
+	BOOL SetChannelRFFrequency(UCHAR ucANTChannel_, UCHAR ucRFFrequency_, ULONG ulResponseTime_)
+	{
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_CHANNEL_RADIO_FREQ_ID;
+	   stMessage.aucData[0] = ucANTChannel_;
+	   stMessage.aucData[1] = ucRFFrequency_;
+
+	   return SendCommand(&stMessage, MESG_CHANNEL_RADIO_FREQ_SIZE, ulResponseTime_);
+	}
+	
 private:
 	SoftwareSerial serial_;
 };
@@ -162,6 +208,7 @@ BOOL ANT_ResetSystem(void)
 	{
 		return g_pFramerANT->ResetSystem();
 	}
+	return FALSE;
 }
 
 

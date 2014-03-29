@@ -58,6 +58,10 @@ LCD_5110(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST)
       
       (line_>=5)?(line_=0):line_++;   //next line.(line 0 ~ line 5)
   }
+  void Append(const char ch)
+  {
+	  print(ch);
+  }
   //void begin(){}
 };
 

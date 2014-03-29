@@ -5,7 +5,8 @@ AVR_TOOLS_DIR = /usr
 USER_LIB_PATH = ../../..
 
 BOARD_TAG    = mega2560
-ARDUINO_PORT = /dev/ttyACM*
+#ARDUINO_PORT = /dev/ttyACM*
+ARDUINO_PORT = /dev/ttyUSB*
 ARDUINO_LIBS = SoftwareSerial ANT SPI LCD_5110
 
 

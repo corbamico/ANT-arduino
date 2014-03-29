@@ -1,11 +1,17 @@
 #include <ANT.h>
 #include <LCD_5110.h>
 
+#define ANTPLUS_NETWORK_KEY  {0xB9, 0xA5, 0x21, 0xFB, 0xBD, 0x72, 0xC3, 0x45}
+
+UCHAR aucNetKey[8] = ANTPLUS_NETWORK_KEY;
 LCD_5110 screen(49,47,45,43,41);
+uint8_t  ch;
+
 
 void setup()
 {
 	ANT_Init(0,57600);
+	delay(1000);
 	ANT_ResetSystem();
 	
 	digitalWrite(51,HIGH);
@@ -13,22 +19,23 @@ void setup()
     
     screen.begin();
     screen.clearDisplay();
-      // text display tests
-      screen.setTextSize(1);
-      screen.setTextColor(BLACK);
-     screen.VLOG("step 1:");
-     screen.VLOG("step 2:");
-     screen.VLOG("step 3:");
-     screen.VLOG("step 4:");
-     screen.VLOG("step 5:");
-     screen.VLOG("step 6:");
-     screen.VLOG("step 7:");
-     screen.VLOG("step 8:");
+    screen.VLOG("Init:");
 
-	 screen.display();
-     delay(2000);
+	screen.display();
+    delay(2000);
+    ANT_SetNetworkKey(0,aucNetKey);
 	
 }
 void loop()
 {
+	ANT_SetNetworkKey(0,aucNetKey);
+	delay(1000);
+	/*
+	if(ANT_Read(ch))
+	{
+		screen.VLOG("Rx:");
+		screen.Append(ch);
+		screen.display();
+	}
+	*/
 }

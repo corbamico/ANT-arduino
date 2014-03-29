@@ -27,6 +27,7 @@
 #include "antmessage.h"
 
 #include <SoftwareSerial.h>
+#include <HardwareSerial.h>
 
 class ANTPlusClass
 {
@@ -64,6 +65,8 @@ EXPORT BOOL ANT_OpenChannel(UCHAR ucANTChannel); // Opens a Channel
 EXPORT BOOL ANT_CloseChannel(UCHAR ucANTChannel); // Close a channel
 
 EXPORT BOOL ANT_ResetSystem(void);
+
+EXPORT BOOL ANT_Read(uint8_t& ch);
 
 
 #ifdef __cplusplus

@@ -71,6 +71,8 @@ public:
 	CFramerANT(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic = false):
 		serial_(receivePin,transmitPin,inverse_logic)
 		{
+			serial_.begin(57600);
+			Serial.begin(57600);
 		}
 	BOOL WriteMessage(void *pvData_, USHORT usMessageSize_)
 	{
@@ -97,7 +99,8 @@ public:
 
 
 	   //if (pclSerial->WriteBytes(aucTxFifo, ucTotalSize))
-	   if (serial_.write(aucTxFifo, ucTotalSize))
+//	   if (serial_.write(aucTxFifo, ucTotalSize))
+	   if (Serial.write(aucTxFifo, ucTotalSize))
 	   {
 		  return TRUE;
 	   }
@@ -117,6 +120,7 @@ public:
 		//wait response
 		else
 		{
+			return WriteMessage(pstANTMessage_, usMessageSize_);
 		}
 		
 		return FALSE;
@@ -152,6 +156,21 @@ public:
 
 	   return SendCommand(&stMessage, MESG_ASSIGN_CHANNEL_SIZE, ulResponseTime_);
 	}
+	
+	BOOL SetChannelID(UCHAR ucANTChannel_, USHORT usDeviceNumber_, UCHAR ucDeviceType_, UCHAR ucTransmitType_, ULONG ulResponseTime_)
+	{
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_CHANNEL_ID_ID;
+	   stMessage.aucData[0] = ucANTChannel_;
+	   stMessage.aucData[1] = (UCHAR)(usDeviceNumber_ & 0xFF);
+	   stMessage.aucData[2] = (UCHAR)((usDeviceNumber_ >>8) & 0xFF);
+	   stMessage.aucData[3] = ucDeviceType_;
+	   stMessage.aucData[4] = ucTransmitType_;
+
+	   return SendCommand(&stMessage, MESG_CHANNEL_ID_SIZE, ulResponseTime_);
+	}
+	
 	BOOL SetChannelPeriod(UCHAR ucANTChannel_, USHORT usMessagePeriod_, ULONG ulResponseTime_)
 	{
 	   ANT_MESSAGE stMessage;
@@ -172,6 +191,27 @@ public:
 	   stMessage.aucData[1] = ucRFFrequency_;
 
 	   return SendCommand(&stMessage, MESG_CHANNEL_RADIO_FREQ_SIZE, ulResponseTime_);
+	}
+	
+	
+	BOOL CloseChannel(UCHAR ucANTChannel_, ULONG ulResponseTime_)
+	{
+	   BOOL bReturn;
+	   ANT_MESSAGE stMessage;
+
+	   stMessage.ucMessageID = MESG_CLOSE_CHANNEL_ID;
+	   stMessage.aucData[0]  = ucANTChannel_;
+	   bReturn = SendCommand(&stMessage, MESG_CLOSE_CHANNEL_SIZE, ulResponseTime_);
+	   return bReturn;
+	}
+	BOOL Read(uint8_t& ch)
+	{
+		if (Serial3.available() > 0)
+		{
+			ch = Serial.read();
+			return TRUE;
+		}
+		return FALSE;
 	}
 	
 private:
@@ -211,4 +251,22 @@ BOOL ANT_ResetSystem(void)
 	return FALSE;
 }
 
+extern "C" EXPORT
+BOOL ANT_Read(uint8_t& ch)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->Read(ch);
+	}
+	return FALSE;
+}
+extern "C" EXPORT 
+BOOL ANT_SetNetworkKey(UCHAR ucNetNumber, UCHAR *pucKey)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->SetNetworkKey(ucNetNumber,pucKey,0);
+	}
+	return FALSE;	
+}
 

@@ -62,6 +62,10 @@ LCD_5110(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST)
   {
 	  print(ch);
   }
+  void Append(const String& str)
+  {
+	  print(str);
+  }
   //void begin(){}
 };
 

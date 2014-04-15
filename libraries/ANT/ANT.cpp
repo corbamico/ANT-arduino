@@ -71,8 +71,8 @@ public:
 	CFramerANT(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic = false):
 		serial_(receivePin,transmitPin,inverse_logic)
 		{
-			serial_.begin(57600);
-			Serial.begin(57600);
+			serial_.begin(4800);
+			Serial.begin(4800);
 		}
 	BOOL WriteMessage(void *pvData_, USHORT usMessageSize_)
 	{
@@ -206,7 +206,7 @@ public:
 	}
 	BOOL Read(uint8_t& ch)
 	{
-		if (Serial3.available() > 0)
+		if (Serial.available() > 0)
 		{
 			ch = Serial.read();
 			return TRUE;
@@ -268,5 +268,53 @@ BOOL ANT_SetNetworkKey(UCHAR ucNetNumber, UCHAR *pucKey)
 		return g_pFramerANT->SetNetworkKey(ucNetNumber,pucKey,0);
 	}
 	return FALSE;	
+}
+extern "C" EXPORT 
+BOOL ANT_AssignChannel(UCHAR ucANTChannel_, UCHAR ucChannelType_, UCHAR ucNetworkNumber_)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->AssignChannel(ucANTChannel_,ucChannelType_,ucNetworkNumber_,0/*ulResponseTime_*/);
+	}
+	return FALSE;	
+}
+
+extern "C" EXPORT 
+BOOL ANT_SetChannelId(UCHAR ucANTChannel, USHORT usDeviceNumber, UCHAR ucDeviceType, UCHAR ucTransmissionType_)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->SetChannelID(ucANTChannel,usDeviceNumber,ucDeviceType,ucTransmissionType_,0/**/);
+	}
+	return FALSE;
+}
+extern "C" EXPORT 
+BOOL ANT_SetChannelPeriod(UCHAR ucANTChannel, USHORT usMesgPeriod)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->SetChannelPeriod(ucANTChannel,usMesgPeriod,0 /*ULONG ulResponseTime_*/);
+	}
+	return FALSE;
+}
+
+extern "C" EXPORT 
+BOOL ANT_SetChannelRFFreq(UCHAR ucANTChannel, UCHAR ucRFFreq)
+{
+	if (g_pFramerANT)
+	{
+		return g_pFramerANT->SetChannelRFFrequency(ucANTChannel,ucRFFreq,0 /*ULONG ulResponseTime_*/);
+	}
+	return FALSE;
+}
+
+extern "C" EXPORT 
+BOOL ANT_OpenChannel(UCHAR ucANTChannel) // Opens a Channel
+{
+	if (g_pFramerANT)
+	{
+		return FALSE;//
+	}
+	return FALSE;
 }
 
